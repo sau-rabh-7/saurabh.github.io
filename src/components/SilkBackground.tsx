@@ -1,7 +1,8 @@
+
 /* eslint-disable react/no-unknown-property */
 import React, { forwardRef, useRef, useMemo, useLayoutEffect } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Color, ShaderMaterial } from "three";
+import { Color } from "three";
 import { usePortfolio } from '@/contexts/PortfolioContext';
 
 const hexToNormalizedRGB = (hex: string) => {
@@ -100,7 +101,6 @@ const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms 
     <mesh ref={ref}>
       <planeGeometry args={[1, 1, 1, 1]} />
       <shaderMaterial
-        attach="material"
         uniforms={uniforms}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
