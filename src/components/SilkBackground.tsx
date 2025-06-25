@@ -2,7 +2,7 @@
 /* eslint-disable react/no-unknown-property */
 import React, { forwardRef, useRef, useMemo, useLayoutEffect } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Color, ShaderMaterial } from "three";
+import { Color } from "three";
 import { usePortfolio } from '@/contexts/PortfolioContext';
 
 const hexToNormalizedRGB = (hex: string) => {
@@ -84,14 +84,6 @@ interface SilkPlaneProps {
 
 const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
   const { viewport } = useThree();
-  
-  const shaderMaterial = useMemo(() => {
-    return new ShaderMaterial({
-      uniforms,
-      vertexShader,
-      fragmentShader,
-    });
-  }, [uniforms]);
 
   useLayoutEffect(() => {
     if (ref && 'current' in ref && ref.current) {
@@ -100,14 +92,19 @@ const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms 
   }, [ref, viewport]);
 
   useFrame((_, delta) => {
-    if (ref && 'current' in ref && ref.current) {
+    if (ref && 'current' in ref && ref.current && ref.current.material?.uniforms) {
       ref.current.material.uniforms.uTime.value += 0.1 * delta;
     }
   });
 
   return (
-    <mesh ref={ref} material={shaderMaterial}>
+    <mesh ref={ref}>
       <planeGeometry args={[1, 1, 1, 1]} />
+      <shaderMaterial
+        uniforms={uniforms}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+      />
     </mesh>
   );
 });
