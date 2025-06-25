@@ -1,9 +1,11 @@
-/* eslint-disable react/no-unknown-property */
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { forwardRef, useRef, useMemo, useLayoutEffect } from "react";
-import { Color } from "three";
 
-const hexToNormalizedRGB = (hex) => {
+/* eslint-disable react/no-unknown-property */
+import React, { forwardRef, useRef, useMemo, useLayoutEffect } from 'react';
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Color } from "three";
+import { usePortfolio } from '@/contexts/PortfolioContext';
+
+const hexToNormalizedRGB = (hex: string) => {
   hex = hex.replace("#", "");
   return [
     parseInt(hex.slice(0, 2), 16) / 255,
@@ -69,17 +71,30 @@ void main() {
 }
 `;
 
-const SilkPlane = forwardRef(function SilkPlane({ uniforms }, ref) {
+interface SilkPlaneProps {
+  uniforms: {
+    uSpeed: { value: number };
+    uScale: { value: number };
+    uNoiseIntensity: { value: number };
+    uColor: { value: Color };
+    uRotation: { value: number };
+    uTime: { value: number };
+  };
+}
+
+const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
   const { viewport } = useThree();
 
   useLayoutEffect(() => {
-    if (ref.current) {
+    if (ref && 'current' in ref && ref.current) {
       ref.current.scale.set(viewport.width, viewport.height, 1);
     }
   }, [ref, viewport]);
 
   useFrame((_, delta) => {
-    ref.current.material.uniforms.uTime.value += 0.1 * delta;
+    if (ref && 'current' in ref && ref.current && ref.current.material?.uniforms) {
+      ref.current.material.uniforms.uTime.value += 0.1 * delta;
+    }
   });
 
   return (
@@ -93,34 +108,31 @@ const SilkPlane = forwardRef(function SilkPlane({ uniforms }, ref) {
     </mesh>
   );
 });
-SilkPlane.displayName = "SilkPlane";
 
-const Silk = ({
-  speed = 5,
-  scale = 1,
-  color = "#7B7481",
-  noiseIntensity = 1.5,
-  rotation = 0,
-}) => {
+const SilkBackground: React.FC = () => {
+  const { data } = usePortfolio();
+  const { backgroundSettings } = data;
   const meshRef = useRef();
 
   const uniforms = useMemo(
     () => ({
-      uSpeed: { value: speed },
-      uScale: { value: scale },
-      uNoiseIntensity: { value: noiseIntensity },
-      uColor: { value: new Color(...hexToNormalizedRGB(color)) },
-      uRotation: { value: rotation },
+      uSpeed: { value: backgroundSettings.speed },
+      uScale: { value: backgroundSettings.scale },
+      uNoiseIntensity: { value: backgroundSettings.noise },
+      uColor: { value: new Color(...hexToNormalizedRGB(backgroundSettings.color)) },
+      uRotation: { value: backgroundSettings.rotation },
       uTime: { value: 0 },
     }),
-    [speed, scale, noiseIntensity, color, rotation]
+    [backgroundSettings]
   );
 
   return (
-    <Canvas dpr={[1, 2]} frameloop="always">
-      <SilkPlane ref={meshRef} uniforms={uniforms} />
-    </Canvas>
+    <div className="fixed inset-0 pointer-events-none z-0">
+      <Canvas dpr={[1, 2]} frameloop="always">
+        <SilkPlane ref={meshRef} uniforms={uniforms} />
+      </Canvas>
+    </div>
   );
 };
 
-export default Silk;
+export default SilkBackground;
