@@ -2,7 +2,7 @@
 /* eslint-disable react/no-unknown-property */
 import React, { forwardRef, useRef, useMemo, useLayoutEffect } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Color } from "three";
+import { Color, ShaderMaterial } from "three";
 import { usePortfolio } from '@/contexts/PortfolioContext';
 
 const hexToNormalizedRGB = (hex: string) => {
@@ -84,6 +84,14 @@ interface SilkPlaneProps {
 
 const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
   const { viewport } = useThree();
+  
+  const shaderMaterial = useMemo(() => {
+    return new ShaderMaterial({
+      uniforms,
+      vertexShader,
+      fragmentShader,
+    });
+  }, [uniforms]);
 
   useLayoutEffect(() => {
     if (ref && 'current' in ref && ref.current) {
@@ -98,13 +106,8 @@ const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms 
   });
 
   return (
-    <mesh ref={ref}>
+    <mesh ref={ref} material={shaderMaterial}>
       <planeGeometry args={[1, 1, 1, 1]} />
-      <shaderMaterial
-        uniforms={uniforms}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-      />
     </mesh>
   );
 });
