@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -84,11 +88,26 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'blob': {
+					'0%, 100%': {
+						transform: 'scale(1) rotate(0deg)',
+					},
+					'33%': {
+						transform: 'scale(1.1) rotate(120deg)',
+					},
+					'66%': {
+						transform: 'scale(0.9) rotate(240deg)',
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'blob': 'blob 2s infinite ease-in-out',
+			},
+			backdropBlur: {
+				xs: '2px',
 			}
 		}
 	},
