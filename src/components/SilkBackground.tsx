@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Color } from "three";
 import { usePortfolio } from '@/contexts/PortfolioContext';
 
-const hexToNormalizedRGB = (hex: string) => {
+const hexToNormalizedRGB = (hex) => {
   hex = hex.replace("#", "");
   return [
     parseInt(hex.slice(0, 2), 16) / 255,
@@ -71,30 +71,17 @@ void main() {
 }
 `;
 
-interface SilkPlaneProps {
-  uniforms: {
-    uSpeed: { value: number };
-    uScale: { value: number };
-    uNoiseIntensity: { value: number };
-    uColor: { value: Color };
-    uRotation: { value: number };
-    uTime: { value: number };
-  };
-}
-
-const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
+const SilkPlane = forwardRef(function SilkPlane({ uniforms }, ref) {
   const { viewport } = useThree();
 
   useLayoutEffect(() => {
-    if (ref && 'current' in ref && ref.current) {
+    if (ref.current) {
       ref.current.scale.set(viewport.width, viewport.height, 1);
     }
   }, [ref, viewport]);
 
   useFrame((_, delta) => {
-    if (ref && 'current' in ref && ref.current && ref.current.material?.uniforms) {
-      ref.current.material.uniforms.uTime.value += 0.1 * delta;
-    }
+    ref.current.material.uniforms.uTime.value += 0.1 * delta;
   });
 
   return (
@@ -108,8 +95,9 @@ const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms 
     </mesh>
   );
 });
+SilkPlane.displayName = "SilkPlane";
 
-const SilkBackground: React.FC = () => {
+const SilkBackground = () => {
   const { data } = usePortfolio();
   const { backgroundSettings } = data;
   const meshRef = useRef();
