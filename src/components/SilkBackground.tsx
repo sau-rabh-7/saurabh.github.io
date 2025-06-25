@@ -72,7 +72,14 @@ void main() {
 `;
 
 interface SilkPlaneProps {
-  uniforms: any;
+  uniforms: {
+    uSpeed: { value: number };
+    uScale: { value: number };
+    uNoiseIntensity: { value: number };
+    uColor: { value: Color };
+    uRotation: { value: number };
+    uTime: { value: number };
+  };
 }
 
 const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
@@ -94,9 +101,12 @@ const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms 
     <mesh ref={ref}>
       <planeGeometry args={[1, 1, 1, 1]} />
       <shaderMaterial
-        uniforms={uniforms}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
+        attach="material"
+        args={[{
+          uniforms,
+          vertexShader,
+          fragmentShader,
+        }]}
       />
     </mesh>
   );
