@@ -1,4 +1,3 @@
-
 /* eslint-disable react/no-unknown-property */
 import React, { forwardRef, useRef, useMemo, useLayoutEffect } from 'react';
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -84,14 +83,6 @@ interface SilkPlaneProps {
 
 const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
   const { viewport } = useThree();
-  
-  const shaderMaterial = useMemo(() => {
-    return new ShaderMaterial({
-      uniforms,
-      vertexShader,
-      fragmentShader,
-    });
-  }, [uniforms]);
 
   useLayoutEffect(() => {
     if (ref && 'current' in ref && ref.current) {
@@ -106,8 +97,14 @@ const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms 
   });
 
   return (
-    <mesh ref={ref} material={shaderMaterial}>
+    <mesh ref={ref}>
       <planeGeometry args={[1, 1, 1, 1]} />
+      <shaderMaterial
+        attach="material"
+        uniforms={uniforms}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+      />
     </mesh>
   );
 });
