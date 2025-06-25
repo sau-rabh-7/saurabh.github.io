@@ -1,15 +1,18 @@
 
 import React from 'react';
 import { usePortfolio } from '@/contexts/PortfolioContext';
+import { useColorPalette } from '@/hooks/useColorPalette';
 import SilkBackground from '@/components/SilkBackground';
 import MouseBlob from '@/components/MouseBlob';
+import SkillCircle from '@/components/SkillCircle';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Github, Linkedin, Instagram } from 'lucide-react';
+import { Github, Linkedin, Instagram, Globe, FileText } from 'lucide-react';
 
 const Home: React.FC = () => {
   const { data } = usePortfolio();
+  const { textOnPrimary } = useColorPalette();
   const { personalInfo, socialMedia, skills, experiences, currentlyLearning } = data;
 
   const skillsByCategory = skills.reduce((acc, skill) => {
@@ -18,8 +21,19 @@ const Home: React.FC = () => {
     return acc;
   }, {} as Record<string, typeof skills>);
 
+  const getSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'github': return <Github className="w-6 h-6" />;
+      case 'linkedin': return <Linkedin className="w-6 h-6" />;
+      case 'instagram': return <Instagram className="w-6 h-6" />;
+      case 'glassdoor':
+      case 'indeed':
+      default: return <Globe className="w-6 h-6" />;
+    }
+  };
+
   return (
-    <div className="min-h-screen relative text-white">
+    <div className="min-h-screen relative" style={{ color: textOnPrimary }}>
       <SilkBackground />
       <MouseBlob />
       
@@ -63,61 +77,42 @@ const Home: React.FC = () => {
                   className="border-white/30 text-white hover:bg-white/10"
                   onClick={() => window.open(personalInfo.resumeUrl)}
                 >
+                  <FileText className="w-4 h-4 mr-2" />
                   Download Resume
                 </Button>
               </div>
 
               {/* Social Media */}
               <div className="flex gap-4 justify-center lg:justify-start">
-                <a
-                  href={socialMedia.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-white/20 backdrop-blur-lg rounded-full hover:bg-white/30 transition-colors"
-                >
-                  <Linkedin className="w-6 h-6" />
-                </a>
-                <a
-                  href={socialMedia.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-white/20 backdrop-blur-lg rounded-full hover:bg-white/30 transition-colors"
-                >
-                  <Github className="w-6 h-6" />
-                </a>
-                <a
-                  href={socialMedia.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-white/20 backdrop-blur-lg rounded-full hover:bg-white/30 transition-colors"
-                >
-                  <Instagram className="w-6 h-6" />
-                </a>
+                {Object.entries(socialMedia).map(([platform, url]) => (
+                  <a
+                    key={platform}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 bg-white/20 backdrop-blur-lg rounded-full hover:bg-white/30 transition-colors"
+                  >
+                    {getSocialIcon(platform)}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Skills Section */}
           <div className="grid lg:grid-cols-2 gap-8 mb-16">
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20 p-6">
+            <Card className="bg-white/5 backdrop-blur-lg border-white/10 p-6">
               <h3 className="text-2xl font-semibold mb-6 text-white">Skills</h3>
               {Object.entries(skillsByCategory).map(([category, categorySkills]) => (
                 <div key={category} className="mb-6">
-                  <h4 className="text-lg font-medium mb-3 text-gray-200">{category}</h4>
-                  <div className="space-y-3">
+                  <h4 className="text-lg font-medium mb-4 text-gray-200">{category}</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {categorySkills.map((skill) => (
-                      <div key={skill.id}>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-gray-200">{skill.name}</span>
-                          <span className="text-gray-300">{skill.level}%</span>
-                        </div>
-                        <div className="w-full bg-white/20 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-white to-gray-300 h-2 rounded-full transition-all duration-500"
-                            style={{ width: `${skill.level}%` }}
-                          />
-                        </div>
-                      </div>
+                      <SkillCircle
+                        key={skill.id}
+                        skill={skill}
+                        color="rgba(255,255,255,0.8)"
+                      />
                     ))}
                   </div>
                 </div>
@@ -126,7 +121,7 @@ const Home: React.FC = () => {
 
             <div className="space-y-8">
               {/* Experience */}
-              <Card className="bg-white/10 backdrop-blur-lg border-white/20 p-6">
+              <Card className="bg-white/5 backdrop-blur-lg border-white/10 p-6">
                 <h3 className="text-2xl font-semibold mb-6 text-white">Experience</h3>
                 <div className="space-y-4">
                   {experiences.map((exp) => (
@@ -140,7 +135,7 @@ const Home: React.FC = () => {
               </Card>
 
               {/* Currently Learning */}
-              <Card className="bg-white/10 backdrop-blur-lg border-white/20 p-6">
+              <Card className="bg-white/5 backdrop-blur-lg border-white/10 p-6">
                 <h3 className="text-2xl font-semibold mb-6 text-white">Currently Learning</h3>
                 <div className="flex flex-wrap gap-2">
                   {currentlyLearning.map((item, index) => (

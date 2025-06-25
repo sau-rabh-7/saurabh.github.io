@@ -1,9 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
+import { usePortfolio } from '@/contexts/PortfolioContext';
 
 const MouseBlob: React.FC = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  const { data } = usePortfolio();
+  const { mouseBlobSettings } = data;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -30,35 +33,24 @@ const MouseBlob: React.FC = () => {
         isVisible ? 'opacity-100' : 'opacity-0'
       }`}
       style={{
-        left: position.x - 25,
-        top: position.y - 25,
-        width: 50,
-        height: 50,
+        left: position.x - mouseBlobSettings.size / 2,
+        top: position.y - mouseBlobSettings.size / 2,
+        width: mouseBlobSettings.size,
+        height: mouseBlobSettings.size,
       }}
     >
       <div
-        className="w-full h-full rounded-full"
+        className="w-full h-full"
         style={{
-          background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.05) 100%)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          boxShadow: '0 8px 32px rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.3)',
-          animation: 'blob 2s infinite ease-in-out',
+          background: `radial-gradient(circle, rgba(255,255,255,${mouseBlobSettings.opacity}) 0%, rgba(255,255,255,${mouseBlobSettings.opacity * 0.3}) 40%, rgba(255,255,255,${mouseBlobSettings.opacity * 0.1}) 100%)`,
+          backdropFilter: `blur(${mouseBlobSettings.blur}px)`,
+          border: `1px solid rgba(255,255,255,${mouseBlobSettings.opacity * 0.4})`,
+          borderRadius: `${mouseBlobSettings.borderRadius}%`,
+          boxShadow: `0 8px 32px rgba(255,255,255,${mouseBlobSettings.opacity * 0.2}), inset 0 1px 0 rgba(255,255,255,${mouseBlobSettings.opacity * 0.6})`,
+          transform: `scale(${mouseBlobSettings.scale})`,
+          animation: `blob ${mouseBlobSettings.animationSpeed}s infinite ease-in-out`,
         }}
       />
-      <style jsx>{`
-        @keyframes blob {
-          0%, 100% {
-            transform: scale(1) rotate(0deg);
-          }
-          33% {
-            transform: scale(1.1) rotate(120deg);
-          }
-          66% {
-            transform: scale(0.9) rotate(240deg);
-          }
-        }
-      `}</style>
     </div>
   );
 };

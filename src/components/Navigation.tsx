@@ -5,9 +5,13 @@ import { useColorPalette } from '@/hooks/useColorPalette';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
-  const { primary, secondary } = useColorPalette();
+  const { primary, secondary, textOnPrimary, textOnSecondary } = useColorPalette();
   
   const isHome = location.pathname === '/';
+  const isSecretAdmin = location.pathname === '/secret-admin-panel-xyz123';
+  
+  // Don't show navigation on secret admin page
+  if (isSecretAdmin) return null;
   
   const navItems = [
     { path: '/', label: 'Home' },
@@ -15,7 +19,6 @@ const Navigation: React.FC = () => {
     { path: '/research', label: 'Research' },
     { path: '/hobbies', label: 'Hobbies' },
     { path: '/certifications', label: 'Certifications' },
-    { path: '/admin', label: 'Admin' },
   ];
 
   return (

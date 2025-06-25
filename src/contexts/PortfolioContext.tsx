@@ -25,6 +25,7 @@ interface Skill {
   name: string;
   level: number;
   category: string;
+  icon?: string;
 }
 
 interface Experience {
@@ -77,6 +78,15 @@ interface BackgroundSettings {
   color: string;
 }
 
+interface MouseBlobSettings {
+  size: number;
+  opacity: number;
+  blur: number;
+  borderRadius: number;
+  scale: number;
+  animationSpeed: number;
+}
+
 interface PortfolioData {
   personalInfo: PersonalInfo;
   socialMedia: SocialMedia;
@@ -88,6 +98,7 @@ interface PortfolioData {
   hobbies: Hobby[];
   certifications: Certification[];
   backgroundSettings: BackgroundSettings;
+  mouseBlobSettings: MouseBlobSettings;
   selectedPalette: number;
 }
 
@@ -103,6 +114,7 @@ interface PortfolioContextType {
   updateHobbies: (hobbies: Hobby[]) => void;
   updateCertifications: (certifications: Certification[]) => void;
   updateBackgroundSettings: (settings: BackgroundSettings) => void;
+  updateMouseBlobSettings: (settings: MouseBlobSettings) => void;
   updateSelectedPalette: (palette: number) => void;
 }
 
@@ -127,7 +139,10 @@ const defaultData: PortfolioData = {
   skills: [
     { id: '1', name: 'React', level: 90, category: 'Frontend' },
     { id: '2', name: 'TypeScript', level: 85, category: 'Languages' },
-    { id: '3', name: 'Node.js', level: 80, category: 'Backend' }
+    { id: '3', name: 'Node.js', level: 80, category: 'Backend' },
+    { id: '4', name: 'Python', level: 75, category: 'Languages' },
+    { id: '5', name: 'Docker', level: 70, category: 'DevOps' },
+    { id: '6', name: 'AWS', level: 65, category: 'Cloud' }
   ],
   experiences: [
     {
@@ -144,11 +159,19 @@ const defaultData: PortfolioData = {
   hobbies: [],
   certifications: [],
   backgroundSettings: {
-    speed: 1,
+    speed: 5,
     scale: 1,
-    noise: 0.5,
+    noise: 1.5,
     rotation: 0,
-    color: '#6366f1'
+    color: '#7B7481'
+  },
+  mouseBlobSettings: {
+    size: 50,
+    opacity: 0.3,
+    blur: 20,
+    borderRadius: 50,
+    scale: 1,
+    animationSpeed: 2
   },
   selectedPalette: 1
 };
@@ -210,6 +233,10 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     saveData({ ...data, backgroundSettings: settings });
   };
 
+  const updateMouseBlobSettings = (settings: MouseBlobSettings) => {
+    saveData({ ...data, mouseBlobSettings: settings });
+  };
+
   const updateSelectedPalette = (palette: number) => {
     saveData({ ...data, selectedPalette: palette });
   };
@@ -227,6 +254,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       updateHobbies,
       updateCertifications,
       updateBackgroundSettings,
+      updateMouseBlobSettings,
       updateSelectedPalette
     }}>
       {children}

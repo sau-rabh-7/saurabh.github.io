@@ -1,86 +1,130 @@
 
-import React, { useEffect, useRef } from 'react';
+/* eslint-disable react/no-unknown-property */
+import React, { forwardRef, useRef, useMemo, useLayoutEffect } from 'react';
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Color } from "three";
 import { usePortfolio } from '@/contexts/PortfolioContext';
 
-const SilkBackground: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { data } = usePortfolio();
-  const { backgroundSettings } = data;
+const hexToNormalizedRGB = (hex: string) => {
+  hex = hex.replace("#", "");
+  return [
+    parseInt(hex.slice(0, 2), 16) / 255,
+    parseInt(hex.slice(2, 4), 16) / 255,
+    parseInt(hex.slice(4, 6), 16) / 255,
+  ];
+};
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+const vertexShader = `
+varying vec2 vUv;
+varying vec3 vPosition;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+void main() {
+  vPosition = position;
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
 
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
+const fragmentShader = `
+varying vec2 vUv;
+varying vec3 vPosition;
 
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+uniform float uTime;
+uniform vec3  uColor;
+uniform float uSpeed;
+uniform float uScale;
+uniform float uRotation;
+uniform float uNoiseIntensity;
 
-    let animationId: number;
-    let time = 0;
+const float e = 2.71828182845904523536;
 
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      time += backgroundSettings.speed * 0.01;
-      
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, `${backgroundSettings.color}20`);
-      gradient.addColorStop(0.5, `${backgroundSettings.color}10`);
-      gradient.addColorStop(1, `${backgroundSettings.color}20`);
-      
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+float noise(vec2 texCoord) {
+  float G = e;
+  vec2  r = (G * sin(G * texCoord));
+  return fract(r.x * r.y * (1.0 + texCoord.x));
+}
 
-      // Create silk-like flowing waves
-      for (let i = 0; i < 5; i++) {
-        ctx.beginPath();
-        ctx.strokeStyle = `${backgroundSettings.color}${Math.floor(30 + i * 10).toString(16)}`;
-        ctx.lineWidth = 2 + i;
-        
-        const offset = i * 100;
-        const waveHeight = 50 * backgroundSettings.scale;
-        const frequency = 0.01 * backgroundSettings.scale;
-        
-        for (let x = 0; x <= canvas.width; x += 5) {
-          const y = canvas.height / 2 + 
-            Math.sin((x + offset) * frequency + time + backgroundSettings.rotation) * waveHeight +
-            Math.sin((x + offset) * frequency * 2 + time * 1.5) * (waveHeight * 0.5) +
-            (Math.random() - 0.5) * backgroundSettings.noise * 20;
-          
-          if (x === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
-        }
-        
-        ctx.stroke();
-      }
+vec2 rotateUvs(vec2 uv, float angle) {
+  float c = cos(angle);
+  float s = sin(angle);
+  mat2  rot = mat2(c, -s, s, c);
+  return rot * uv;
+}
 
-      animationId = requestAnimationFrame(animate);
-    };
+void main() {
+  float rnd        = noise(gl_FragCoord.xy);
+  vec2  uv         = rotateUvs(vUv * uScale, uRotation);
+  vec2  tex        = uv * uScale;
+  float tOffset    = uSpeed * uTime;
 
-    animate();
+  tex.y += 0.03 * sin(8.0 * tex.x - tOffset);
 
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      cancelAnimationFrame(animationId);
-    };
-  }, [backgroundSettings]);
+  float pattern = 0.6 +
+                  0.4 * sin(5.0 * (tex.x + tex.y +
+                                   cos(3.0 * tex.x + 5.0 * tex.y) +
+                                   0.02 * tOffset) +
+                           sin(20.0 * (tex.x + tex.y - 0.1 * tOffset)));
+
+  vec4 col = vec4(uColor, 1.0) * vec4(pattern) - rnd / 15.0 * uNoiseIntensity;
+  col.a = 1.0;
+  gl_FragColor = col;
+}
+`;
+
+interface SilkPlaneProps {
+  uniforms: any;
+}
+
+const SilkPlane = forwardRef<any, SilkPlaneProps>(function SilkPlane({ uniforms }, ref) {
+  const { viewport } = useThree();
+
+  useLayoutEffect(() => {
+    if (ref && 'current' in ref && ref.current) {
+      ref.current.scale.set(viewport.width, viewport.height, 1);
+    }
+  }, [ref, viewport]);
+
+  useFrame((_, delta) => {
+    if (ref && 'current' in ref && ref.current) {
+      ref.current.material.uniforms.uTime.value += 0.1 * delta;
+    }
+  });
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)' }}
-    />
+    <mesh ref={ref}>
+      <planeGeometry args={[1, 1, 1, 1]} />
+      <shaderMaterial
+        uniforms={uniforms}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+      />
+    </mesh>
+  );
+});
+
+const SilkBackground: React.FC = () => {
+  const { data } = usePortfolio();
+  const { backgroundSettings } = data;
+  const meshRef = useRef();
+
+  const uniforms = useMemo(
+    () => ({
+      uSpeed: { value: backgroundSettings.speed },
+      uScale: { value: backgroundSettings.scale },
+      uNoiseIntensity: { value: backgroundSettings.noise },
+      uColor: { value: new Color(...hexToNormalizedRGB(backgroundSettings.color)) },
+      uRotation: { value: backgroundSettings.rotation },
+      uTime: { value: 0 },
+    }),
+    [backgroundSettings]
+  );
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0">
+      <Canvas dpr={[1, 2]} frameloop="always">
+        <SilkPlane ref={meshRef} uniforms={uniforms} />
+      </Canvas>
+    </div>
   );
 };
 

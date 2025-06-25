@@ -11,7 +11,7 @@ import Projects from "@/pages/Projects";
 import Research from "@/pages/Research";
 import Hobbies from "@/pages/Hobbies";
 import Certifications from "@/pages/Certifications";
-import Admin from "@/pages/Admin";
+import SecretAdmin from "@/pages/SecretAdmin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,7 +31,7 @@ const App = () => (
               <Route path="/research" element={<Research />} />
               <Route path="/hobbies" element={<Hobbies />} />
               <Route path="/certifications" element={<Certifications />} />
-              <Route path="/admin" element={<Admin />} />
+              <Route path="/secret-admin-panel-xyz123" element={<SecretAdmin />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
