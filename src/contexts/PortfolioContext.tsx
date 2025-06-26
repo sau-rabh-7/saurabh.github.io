@@ -120,7 +120,7 @@ interface PortfolioContextType {
 
 const defaultData: PortfolioData = {
   personalInfo: {
-    name: "Your Name",
+    name: "Saurabh Sharma",
     title: "Software Developer",
     description: "Passionate developer with expertise in modern web technologies.",
     profilePhoto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
@@ -166,13 +166,13 @@ const defaultData: PortfolioData = {
     color: '#7B7481'
   },
   mouseBlobSettings: {
-    size: 50,
-    opacity: 0.3,
+    size: 160,
+    opacity: 0.4,
     blur: 20,
-    borderRadius: 50,
+    borderRadius: 50, // ignored now due to animation
     scale: 1,
-    animationSpeed: 2
-  },
+    animationSpeed: 12,
+  },  
   selectedPalette: 1
 };
 

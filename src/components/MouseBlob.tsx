@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 
@@ -44,11 +43,12 @@ const MouseBlob: React.FC = () => {
         style={{
           background: `radial-gradient(circle, rgba(255,255,255,${mouseBlobSettings.opacity}) 0%, rgba(255,255,255,${mouseBlobSettings.opacity * 0.3}) 40%, rgba(255,255,255,${mouseBlobSettings.opacity * 0.1}) 100%)`,
           backdropFilter: `blur(${mouseBlobSettings.blur}px)`,
+          WebkitBackdropFilter: `blur(${mouseBlobSettings.blur}px)`,
           border: `1px solid rgba(255,255,255,${mouseBlobSettings.opacity * 0.4})`,
-          borderRadius: `${mouseBlobSettings.borderRadius}%`,
           boxShadow: `0 8px 32px rgba(255,255,255,${mouseBlobSettings.opacity * 0.2}), inset 0 1px 0 rgba(255,255,255,${mouseBlobSettings.opacity * 0.6})`,
           transform: `scale(${mouseBlobSettings.scale})`,
           animation: `blob ${mouseBlobSettings.animationSpeed}s infinite ease-in-out`,
+          filter: `drop-shadow(0 0 20px rgba(255, 255, 255, ${mouseBlobSettings.opacity * 0.2}))`,
         }}
       />
     </div>
